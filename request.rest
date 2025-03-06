@@ -1,0 +1,24 @@
+GET http://localhost:5500/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsIm5hbWEiOiJpd2FuIGt1cm5pYXdhbiIsImVtYWlsIjoiaXdhbkBnbWFpbC5jb20iLCJpYXQiOjE3Mzc3MTMzODksImV4cCI6MTczNzcxMzQwOX0.ZCcF7i9Aht3IhVtzmDAScT9AThVp0_w6CQSp7IC0_To
+###
+POST http://localhost:5500/users
+Content-Type: application/json
+
+{
+    "nama":"iwan kurniawan",
+    "email":"iwan@gmail.com",
+    "password":"123456",
+    "confPassword":"123456"
+}
+###
+POST http://localhost:5500/login
+Content-Type: application/json
+
+{
+   "email":"iwan@gmail.com",
+   "password":"123456"
+}
+###
+GET http://localhost:5500/token
+###
+DELETE http://localhost:5500/logout
