@@ -13,25 +13,7 @@ export const getAllPenjualan = async (req, res) => {
 // Saat Button Bayar diklik
 export const createPenjualan = async (req, res) => {
   try {
-    const {
-      id,
-      nama,
-      pembeli,
-      tglPembelian,
-      noMember,
-      noPenjualan,
-      tglPenjualan,
-      kodeBarang,
-      distributor,
-      merek,
-      namaBarang,
-      h_beli,
-      h_jual,
-      totHarga,
-      quantity,
-      diskon,
-      potDiskon,
-    } = req.body;
+    const { id, nama, pembeli, tglPembelian, noMember, noPenjualan, tglPenjualan, kodeBarang, distributor, merek, namaBarang, h_beli, h_jual, totHarga, quantity, diskon, potDiskon } = req.body;
 
     const barang = await Produk.findOne({
       where: { id },
@@ -42,9 +24,7 @@ export const createPenjualan = async (req, res) => {
     }
 
     if (barang.quantity === 0) {
-      return res
-        .status(400)
-        .json({ message: "Transaksi dibatalkan: stok barang habis" });
+      return res.status(400).json({ message: "Transaksi dibatalkan: stok barang habis" });
     }
 
     if (quantity > barang.quantity) {
@@ -81,10 +61,17 @@ export const createPenjualan = async (req, res) => {
 
 export const getBySearch = async (req, res) => {
   try {
-    const keySearch = req.params.keySearch || "";
+    const keySearch = req.query.keySearch || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const offset = (page - 1) * limit;
+    // Jika pencarian kosong, kembalikan array kosong
+    if (keySearch === "") {
+      return res.status(200).json({ brg: [] }); // Tidak menampilkan apa pun
+    }
     const safeKeySearch = keySearch.replace(/[%_]/g, "\\$&"); // Escape karakter SQL
 
-    const barang = await Produk.findAll({
+    const { count, rows } = await Produk.findAndCountAll({
       where: {
         [Op.or]: [
           { produk: { [Op.like]: `%${safeKeySearch}%` } }, // LIKE namaProduk
@@ -93,15 +80,14 @@ export const getBySearch = async (req, res) => {
         ],
       },
       order: [["createdAt", "ASC"]],
+      limit, // ⬅️ Pastikan limit diterapkan
+      offset,
     });
-    if (!barang || !Array.isArray(barang)) {
-      return res
-        .status(404)
-        .json({ message: "Barang tidak ditemukan", data: [] });
-    } else {
-      console.log(barang);
-      res.json(barang);
+
+    if (!rows || !Array.isArray(rows)) {
+      return res.json({ message: "Barang tidak ditemukan", data: [] });
     }
+    res.json({ brg: rows, totalCount: count });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
@@ -123,9 +109,7 @@ export const getByDate = async (req, res) => {
       order: [["createdAt", "ASC"]],
     });
     if (!barang || !Array.isArray(barang)) {
-      return res
-        .status(404)
-        .json({ message: "Barang tidak ditemukan", data: [] });
+      return res.status(404).json({ message: "Barang tidak ditemukan", data: [] });
     } else {
       console.log(barang);
       res.json(barang);

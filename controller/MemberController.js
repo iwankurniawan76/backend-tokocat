@@ -12,7 +12,10 @@ export const getAllMember = async (req, res) => {
 
 export const getMemberBySearch = async (req, res) => {
   try {
-    const keySearch = req.params.keySearch || "";
+    const keySearch = req.query.keySearch || "";
+    if (keySearch === "") {
+      return res.status(200).json([]); // Tidak menampilkan apa pun
+    }
     const safeKeySearch = keySearch.replace(/[%_]/g, "\\$&"); // Escape karakter SQL
 
     const result = await Member.findAll({
@@ -27,9 +30,8 @@ export const getMemberBySearch = async (req, res) => {
     });
     if (!result || !Array.isArray(result)) {
       return res.status(404).json({ message: "Barang tidak ditemukan", data: [] });
-    } else {
-      res.json(result);
     }
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
